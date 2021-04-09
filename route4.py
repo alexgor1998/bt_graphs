@@ -52,23 +52,21 @@ for feature in data['features']:
 route = [[],[]]        
 route[0] = np.array(route0[0])
 route[1] = np.array(route0[1])
-#print(route)
 #swapping (lon,lat) to (lat,lon)
 route[0][:,[0,1]] = route[0][:,[1,0]]
 route[1][:,[0,1]] = route[1][:,[1,0]]
-
-print('\n')
-print(route)
+#print('\n')
+#print(route)
 
 pts_fwd = len(route[0])
 pts_bwd = len(route[1])
-
+#onroute distance in forward direction (increases along the track)
 dist_fwd = [gd.distance(route[0][i-1],route[0][i]).km
             for i in range(pts_fwd)]
 dist_fwd[0] = 0 #distance from point #0 to point #0 is 0
-s_fwd = np.cumsum(dist_fwd)
+s_fwd = np.cumsum(dist_fwd) #distance from point #0 to point #i
 len_fwd = s_fwd[-1]
-
+#onroute distance in backward direction (decreases along the track)
 dist_bwd = [gd.distance(route[1][i-1],route[1][i]).km
             for i in range(pts_bwd)]
 dist_bwd[0] = 0 
@@ -76,30 +74,33 @@ s_bwd = np.cumsum(dist_bwd)
 len_bwd = s_bwd[-1]
 s_bwd = len_bwd - s_bwd
 
-print(len_fwd)
-print(len_bwd)
-print(abs(len_fwd-len_bwd)/(len_fwd+len_bwd)*2)
-#%%
+#print(len_fwd)
+#print(len_bwd)
+#print(abs(len_fwd-len_bwd)/(len_fwd+len_bwd)*2)
+
 f2 = open('bus_track_2021-03-27.csv', 'r', encoding='utf-8')
 day_table = pd.read_csv(f2)
 bid = 7995 #for tram #5 -> bus_id = 7995
+
 rt_table = day_table[day_table['bus_id'] == bid]
+
 ts_list = pd.unique(rt_table['bus_name'])
 print(ts_list)
 print('\n')
 sample_ts = ts_list[0]
-ts_table = rt_table[rt_table['bus_name'] == sample_ts]
+ts_table = rt_table.loc[rt_table['bus_name'] == sample_ts]
 #print(ts_table)
-direction = -1
-coords_prev = [ts_table.iloc[0]['lat'],ts_table.iloc[0]['lon']]
-#print(coords_prev)
+direction = -1  #initial direction unknown
 s = 0.0
 pathgraph = []
+
 for ind,ts_point in ts_table.iterrows():
     coords = [ts_point['lat'],ts_point['lon']]
+    #proxtable = list of proximities from the point to the route segments
     if (direction == 0):
         proxtable = [proximity(coords,route[0][i],route[0][i+1])
                      for i in range(pts_fwd-1)]
+        #calculating distance from terminus 0
         iprox = np.argmin(proxtable)
         s = s_fwd[iprox] + gd.distance(coords,route[0][iprox]).km
     if (direction == 1):
@@ -108,9 +109,11 @@ for ind,ts_point in ts_table.iterrows():
         iprox = np.argmin(proxtable)
         s = s_bwd[iprox+1] + gd.distance(coords,route[1][iprox+1]).km    
     if  (gd.distance(route[0][0],coords).km < 0.02):
+        #we are close to terminus 0
         direction = 0
         s = 0
     if  (gd.distance(route[1][0],coords).km < 0.02):
+        #we are close to terminus 1
         direction = 1
         s = len_bwd
     pathgraph.append([ts_point['timestamp'][11:19],s])
