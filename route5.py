@@ -52,7 +52,7 @@ city_lon = 44.00750
 par_n = gd.distance([city_lat+0.5,city_lon-0.5],[city_lat+0.5,city_lon+0.5]).km
 par_s = gd.distance([city_lat-0.5,city_lon-0.5],[city_lat-0.5,city_lon+0.5]).km
 merid = gd.distance([city_lat-0.5,city_lon],[city_lat+0.5,city_lon]).km
-route_name = 'ТР-3'
+route_name = 'А-40'
 print('Route extracion started!')
 route0 = []
 f1 = open('routes.geojson', 'r', encoding='utf-8')
@@ -116,7 +116,7 @@ print(ts_list)
 
 fig = plt.figure(figsize = (20,6))
 ax = fig.add_subplot(1, 1, 1)
-ax.set_prop_cycle(color= cm.rainbow(np.linspace(0, 1, len(ts_list))))
+ax.set_prop_cycle(color= cm.plasma(np.linspace(0, 1, len(ts_list))))
 for sample_ts in ts_list:
     ts_table = rt_table.loc[rt_table['bus_name'] == sample_ts]
     
