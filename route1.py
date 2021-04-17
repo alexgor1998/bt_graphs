@@ -13,9 +13,8 @@ i = 0
 f1 = open('routes.geojson', 'r', encoding='utf-8')
 data = json.load(f1)
 for feature in data['features']:
-    if ((in_dict('ref', feature['properties']) == True)
-        and (feature['properties']['ref'] == '5')
-        and (feature['properties']['route'] == 'tram')):
+    if ((in_dict('ref:official', feature['properties']) == True)
+        and (feature['properties']['ref:official'] == 'ТР-5')):
         result.append(feature['properties'])
         
 print(result)
